@@ -32,15 +32,19 @@ jobs:
       - name: Get latest Node.js versions
         id: get-versions
         run: |
-          # Get latest versions for major versions 24 and above (future-proof for 25, 26, etc.)
-          VERSIONS=$(curl -s https://nodejs.org/dist/index.json | jq -r '
-            [.[] | select(.version | test("^v(2[4-9]|[3-9][0-9])\\.[0-9]+\\.[0-9]+$")) |
-            {version: .version, major: (.version | split(".")[0] | ltrimstr("v"))}] |
-            group_by(.major) |
-            map(max_by(.version | split(".") | map(tonumber))) |
-            map(.version | ltrimstr("v"))
+          # Get latest Node.js 24.x version - using a simpler approach
+          LATEST_24=$(curl -s https://nodejs.org/dist/index.json | jq -r '
+            [.[] | select(.version | startswith("v24."))] | 
+            map(.version) | 
+            sort | 
+            last | 
+            ltrimstr("v")
           ')
-          echo "versions=$(echo $VERSIONS | jq -c .)" >> $GITHUB_OUTPUT
+          
+          # Create JSON array
+          VERSIONS=$(jq -nc --arg v "$LATEST_24" '[$v]')
+          
+          echo "versions=$VERSIONS" >> $GITHUB_OUTPUT
           echo "Found Node.js versions: $VERSIONS"
 
       - name: Check if build is needed
