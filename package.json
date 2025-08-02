@@ -1,0 +1,32 @@
+{
+  "name": "pnpm-docker",
+  "version": "1.0.0",
+  "description": "Docker images with Node.js Alpine and pnpm pre-installed",
+  "main": "index.js",
+  "scripts": {
+    "build": "./build.sh",
+    "build:24": "./build.sh 24",
+    "build:24-alpine": "./build.sh 24 alpine",
+    "build:24-standard": "./build.sh 24 standard",
+    "test": "./test.sh 24 alpine",
+    "test:alpine": "./test.sh 24 alpine",
+    "test:standard": "./test.sh 24 standard"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jana19/pnpm-docker.git"
+  },
+  "keywords": [
+    "docker",
+    "nodejs",
+    "pnpm",
+    "alpine",
+    "container"
+  ],
+  "author": "jana19",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jana19/pnpm-docker/issues"
+  },
+  "homepage": "https://github.com/jana19/pnpm-docker#readme"
+}

@@ -1,0 +1,67 @@
+name: Test Docker Images
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+    paths:
+      - "Dockerfile"
+      - "test.sh"
+      - ".github/workflows/test.yml"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [24]
+        variant: [alpine, standard]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Set variant details
+        id: variant
+        run: |
+          if [[ "${{ matrix.variant }}" == "alpine" ]]; then
+            echo "tag-suffix=-alpine" >> $GITHUB_OUTPUT
+            echo "dockerfile=Dockerfile" >> $GITHUB_OUTPUT
+          else
+            echo "tag-suffix=" >> $GITHUB_OUTPUT
+            echo "dockerfile=Dockerfile.standard" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            --file ${{ steps.variant.outputs.dockerfile }} \
+            --build-arg NODE_VERSION=${{ matrix.node-version }} \
+            -t jana19/pnpm:${{ matrix.node-version }}${{ steps.variant.outputs.tag-suffix }} \
+            .
+
+      - name: Test Docker image
+        run: |
+          chmod +x test.sh
+          ./test.sh ${{ matrix.node-version }} ${{ matrix.variant }}
+
+      - name: Test pnpm install functionality
+        run: |
+          # Create a temporary test project
+          mkdir test-project
+          cd test-project
+          echo '{"name": "test", "dependencies": {"lodash": "^4.17.21"}}' > package.json
+
+          # Test pnpm install
+          docker run --rm -v $(pwd):/app -w /app jana19/pnpm:${{ matrix.node-version }}${{ steps.variant.outputs.tag-suffix }} pnpm install
+
+          # Verify node_modules was created
+          if [ -d "node_modules" ]; then
+            echo "✅ pnpm install worked correctly"
+          else
+            echo "❌ pnpm install failed"
+            exit 1
+          fi

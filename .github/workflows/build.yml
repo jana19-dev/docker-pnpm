@@ -1,0 +1,126 @@
+name: Build and Push PNPM Docker Image
+
+on:
+  schedule:
+    # Run weekly on Sundays at 2 AM UTC to check for new Node.js versions
+    - cron: "0 2 * * 0"
+  push:
+    branches:
+      - main
+    paths:
+      - "Dockerfile"
+      - ".github/workflows/build.yml"
+  workflow_dispatch:
+    inputs:
+      force_build:
+        description: "Force build even if no new version available"
+        required: false
+        default: "false"
+        type: boolean
+
+env:
+  DOCKER_HUB_USERNAME: jana19
+  IMAGE_NAME: jana19/pnpm
+
+jobs:
+  check-node-version:
+    runs-on: ubuntu-latest
+    outputs:
+      node-versions: ${{ steps.get-versions.outputs.versions }}
+      should-build: ${{ steps.check-build.outputs.should-build }}
+    steps:
+      - name: Get latest Node.js versions
+        id: get-versions
+        run: |
+          # Get latest versions for major versions 24 and above (future-proof for 25, 26, etc.)
+          VERSIONS=$(curl -s https://nodejs.org/dist/index.json | jq -r '
+            [.[] | select(.version | test("^v(2[4-9]|[3-9][0-9])\\.[0-9]+\\.[0-9]+$")) |
+            {version: .version, major: (.version | split(".")[0] | ltrimstr("v"))}] |
+            group_by(.major) |
+            map(max_by(.version | split(".") | map(tonumber))) |
+            map(.version | ltrimstr("v"))
+          ')
+          echo "versions=$(echo $VERSIONS | jq -c .)" >> $GITHUB_OUTPUT
+          echo "Found Node.js versions: $VERSIONS"
+
+      - name: Check if build is needed
+        id: check-build
+        run: |
+          if [[ "${{ github.event.inputs.force_build }}" == "true" ]] || [[ "${{ github.event_name }}" == "push" ]]; then
+            echo "should-build=true" >> $GITHUB_OUTPUT
+            echo "Build triggered by push or manual force"
+          else
+            echo "should-build=true" >> $GITHUB_OUTPUT
+            echo "Build triggered by schedule"
+          fi
+
+  build-and-push:
+    needs: check-node-version
+    if: needs.check-node-version.outputs.should-build == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: ${{ fromJson(needs.check-node-version.outputs.node-versions) }}
+        variant: [alpine, standard]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ env.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+      - name: Extract major version and set variant
+        id: extract-major
+        run: |
+          MAJOR_VERSION=$(echo ${{ matrix.node-version }} | cut -d. -f1)
+          echo "major-version=$MAJOR_VERSION" >> $GITHUB_OUTPUT
+
+          if [[ "${{ matrix.variant }}" == "alpine" ]]; then
+            echo "base-tag=-alpine" >> $GITHUB_OUTPUT
+            echo "dockerfile=Dockerfile" >> $GITHUB_OUTPUT
+          else
+            echo "base-tag=" >> $GITHUB_OUTPUT
+            echo "dockerfile=Dockerfile.standard" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ${{ steps.extract-major.outputs.dockerfile }}
+          platforms: linux/amd64,linux/arm64
+          push: true
+          build-args: |
+            NODE_VERSION=${{ matrix.node-version }}
+            VARIANT=${{ matrix.variant }}
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ steps.extract-major.outputs.major-version }}${{ steps.extract-major.outputs.base-tag }}
+            ${{ env.IMAGE_NAME }}:${{ matrix.node-version }}${{ steps.extract-major.outputs.base-tag }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Update Docker Hub description
+        uses: peter-evans/dockerhub-description@v4
+        with:
+          username: ${{ env.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+          repository: ${{ env.IMAGE_NAME }}
+          readme-filepath: ./README.md
+
+  cleanup:
+    needs: [check-node-version, build-and-push]
+    if: always() && needs.build-and-push.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clean up old images
+        run: |
+          echo "Build completed successfully for all versions"
+          echo "Images pushed:"
+          echo "${{ needs.check-node-version.outputs.node-versions }}" | jq -r '.[] | "- jana19/pnpm:" + (. | split(".")[0]) + "-alpine"'
+          echo "${{ needs.check-node-version.outputs.node-versions }}" | jq -r '.[] | "- jana19/pnpm:" + (. | split(".")[0])'

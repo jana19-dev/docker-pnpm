@@ -1,0 +1,11 @@
+node_modules/
+.npm
+.pnpm-store/
+dist/
+build/
+*.log
+.DS_Store
+.env
+.env.local
+.env.production
+.env.development
