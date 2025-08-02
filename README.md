@@ -2,7 +2,7 @@
 
 [![Docker Pulls](https://img.shields.io/docker/pulls/jana19/pnpm)](https://hub.docker.com/r/jana19/pnpm)
 [![Docker Image Size](https://img.shields.io/docker/image-size/jana19/pnpm/24-alpine)](https://hub.docker.com/r/jana19/pnpm)
-[![Build Status](https://github.com/jana19/pnpm-docker/workflows/Build%20and%20Push%20PNPM%20Docker%20Image/badge.svg)](https://github.com/jana19/pnpm-docker/actions)
+[![Build Status](https://github.com/jana19-dev/docker-pnpm/workflows/Build%20and%20Push%20PNPM%20Docker%20Image/badge.svg)](https://github.com/jana19-dev/docker-pnpm/actions)
 
 Pre-built Docker images with Node.js and pnpm pre-installed, available in both Alpine (production) and standard (development) variants.
 
@@ -174,6 +174,6 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ## Support
 
-- 🐛 [Report bugs](https://github.com/jana19/pnpm-docker/issues)
-- 💬 [Discussions](https://github.com/jana19/pnpm-docker/discussions)
+- 🐛 [Report bugs](https://github.com/jana19-dev/docker-pnpm/issues)
+- 💬 [Discussions](https://github.com/jana19-dev/docker-pnpm/discussions)
 - 📧 [Contact maintainer](mailto:your-email@example.com)

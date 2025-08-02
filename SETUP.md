@@ -52,8 +52,8 @@ git add .
 # Commit files
 git commit -m "Initial commit: pnpm Docker images with automated builds"
 
-# Add GitHub remote (replace YOUR_USERNAME with your GitHub username)
-git remote add origin https://github.com/YOUR_USERNAME/pnpm-docker.git
+# Add GitHub remote (this is your actual repository)
+git remote add origin https://github.com/jana19-dev/docker-pnpm.git
 
 # Push to GitHub
 git branch -M main

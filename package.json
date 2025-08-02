@@ -14,7 +14,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jana19/pnpm-docker.git"
+    "url": "git+https://github.com/jana19-dev/docker-pnpm.git"
   },
   "keywords": [
     "docker",
@@ -26,7 +26,7 @@
   "author": "jana19",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/jana19/pnpm-docker/issues"
+    "url": "https://github.com/jana19-dev/docker-pnpm/issues"
   },
-  "homepage": "https://github.com/jana19/pnpm-docker#readme"
+  "homepage": "https://github.com/jana19-dev/docker-pnpm#readme"
 }
