@@ -101,7 +101,7 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           build-args: |
-            NODE_VERSION=${{ matrix.node-version }}
+            NODE_VERSION=${{ steps.extract-major.outputs.major-version }}
             VARIANT=${{ matrix.variant }}
           tags: |
             ${{ env.IMAGE_NAME }}:${{ steps.extract-major.outputs.major-version }}${{ steps.extract-major.outputs.base-tag }}
