@@ -9,6 +9,7 @@ on:
       - main
     paths:
       - "Dockerfile"
+      - "Dockerfile.standard"
       - ".github/workflows/build.yml"
   workflow_dispatch:
     inputs:
