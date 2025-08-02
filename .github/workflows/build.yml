@@ -35,16 +35,16 @@ jobs:
         run: |
           # Get latest Node.js 24.x version - using a simpler approach
           LATEST_24=$(curl -s https://nodejs.org/dist/index.json | jq -r '
-            [.[] | select(.version | startswith("v24."))] | 
-            map(.version) | 
-            sort | 
-            last | 
+            [.[] | select(.version | startswith("v24."))] |
+            map(.version) |
+            sort |
+            last |
             ltrimstr("v")
           ')
-          
+
           # Create JSON array
           VERSIONS=$(jq -nc --arg v "$LATEST_24" '[$v]')
-          
+
           echo "versions=$VERSIONS" >> $GITHUB_OUTPUT
           echo "Found Node.js versions: $VERSIONS"
 
@@ -127,5 +127,7 @@ jobs:
         run: |
           echo "Build completed successfully for all versions"
           echo "Images pushed:"
-          echo "${{ needs.check-node-version.outputs.node-versions }}" | jq -r '.[] | "- jana19/pnpm:" + (. | split(".")[0]) + "-alpine"'
-          echo "${{ needs.check-node-version.outputs.node-versions }}" | jq -r '.[] | "- jana19/pnpm:" + (. | split(".")[0])'
+          echo "- jana19/pnpm:24-alpine"
+          echo "- jana19/pnpm:24"
+          echo "- jana19/pnpm:${{ fromJson(needs.check-node-version.outputs.node-versions)[0] }}-alpine"
+          echo "- jana19/pnpm:${{ fromJson(needs.check-node-version.outputs.node-versions)[0] }}"
