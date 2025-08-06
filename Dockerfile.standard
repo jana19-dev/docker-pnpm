@@ -14,10 +14,10 @@ LABEL description="Node.js standard with pnpm pre-installed"
 
 # Create a non-root user
 RUN groupadd --gid 1001 nodejs && \
-    useradd --uid 1001 --gid nodejs --shell /bin/bash --create-home nextjs
+    useradd --uid 1001 --gid nodejs --shell /bin/bash --create-home pnpmuser
 
 # Switch to non-root user
-USER nextjs
+USER pnpmuser
 
 # Default command
 CMD ["pnpm", "--version"]

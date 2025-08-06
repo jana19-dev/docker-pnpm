@@ -14,10 +14,10 @@ LABEL description="Node.js Alpine with pnpm pre-installed"
 
 # Create a non-root user
 RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nextjs -u 1001
+    adduser -S pnpmuser -u 1001
 
 # Switch to non-root user
-USER nextjs
+USER pnpmuser
 
 # Default command
 CMD ["pnpm", "--version"]

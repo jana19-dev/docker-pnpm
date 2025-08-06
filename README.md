@@ -131,7 +131,7 @@ We focus on modern Node.js versions to ensure optimal performance and security. 
 
 ## Security
 
-- Images run as non-root user (`nextjs:nodejs`)
+- Images run as non-root user (`pnpmuser:nodejs`)
 - Based on official Node.js Alpine images
 - Regular security updates through automated builds
 - Multi-architecture support for better compatibility
@@ -176,4 +176,3 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 - 🐛 [Report bugs](https://github.com/jana19-dev/docker-pnpm/issues)
 - 💬 [Discussions](https://github.com/jana19-dev/docker-pnpm/discussions)
-- 📧 [Contact maintainer](mailto:your-email@example.com)
